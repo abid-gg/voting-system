@@ -13,7 +13,7 @@ function CandidateLogin() {
     setLoading(true);
     setError('');
     try {
-      const res = await axios.post('http://localhost:5000/api/candidate/login', { email, password });
+      const res = await axios.post('https://voting-system-i2uh.onrender.com/api/candidate/login', { email, password });
       if (res.data && res.data._id) {
         localStorage.setItem('candidateId', res.data._id);
         window.location.href = '/candidate-dashboard';

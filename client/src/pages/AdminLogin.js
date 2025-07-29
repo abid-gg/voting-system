@@ -14,7 +14,7 @@ function AdminLogin() {
     setLoading(true);
     setError('');
     try {
-      const res = await axios.post('http://localhost:5000/api/admin/login', { username, password });
+      const res = await axios.post('https://voting-system-i2uh.onrender.com/api/admin/login', { username, password });
       if (res.data && res.data._id) {
         localStorage.setItem('adminId', res.data._id);
         window.location.href = '/admin-dashboard';

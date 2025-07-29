@@ -10,7 +10,7 @@ function VoterVerify() {
   const verifyOTP = async () => {
     try {
       const email = localStorage.getItem('voterEmail');
-      const res = await axios.post('http://localhost:5000/api/user/verify-otp', {
+      const res = await axios.post('https://voting-system-i2uh.onrender.com/api/user/verify-otp', {
         email, otp
       });
 

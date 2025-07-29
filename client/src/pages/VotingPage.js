@@ -15,7 +15,7 @@ function VotingPage() {
   const [voteCounts, setVoteCounts] = useState({});
 
   const voterId = localStorage.getItem('voterId');
-  const backendURL = 'http://localhost:5000/api';
+  const backendURL = 'https://voting-system-i2uh.onrender.com/api';
 
   // Fetch current election and candidates
   useEffect(() => {

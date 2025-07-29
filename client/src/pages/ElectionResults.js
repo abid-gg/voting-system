@@ -9,7 +9,7 @@ function ElectionResults() {
   const [candidates, setCandidates] = useState([]);
   const [voteCounts, setVoteCounts] = useState({});
   const [loading, setLoading] = useState(false);
-  const backendURL = 'http://localhost:5000/api';
+const backendURL = 'https://voting-system-i2uh.onrender.com/api';
 
   // Ref for winner sound
   const winnerAudioRef = useRef(null);

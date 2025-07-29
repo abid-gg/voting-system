@@ -79,7 +79,7 @@ function AdminDashboard() {
   // Fetch all admins
   const fetchAdmins = useCallback(async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/admin/all');
+      const res = await axios.get('https://voting-system-i2uh.onrender.com/api/admin/all');
       setAdmins(res.data);
     } catch {
       showToast('Failed to load admins.', 'error');
@@ -91,7 +91,7 @@ function AdminDashboard() {
     e.preventDefault();
     setAddAdminLoading(true);
     try {
-      const res = await axios.post('http://localhost:5000/api/admin/add', addAdmin);
+      const res = await axios.post('https://voting-system-i2uh.onrender.com/api/admin/add', addAdmin);
       showToast(res.data.message || 'Admin added!');
       setAddAdmin({ username: '', password: '' });
       fetchAdmins();
@@ -120,7 +120,7 @@ function AdminDashboard() {
     try {
       const payload = { ...editAdmin };
       if (!payload.password) delete payload.password;
-      await axios.put(`http://localhost:5000/api/admin/edit/${editAdminId}`, payload);
+      await axios.put(`https://voting-system-i2uh.onrender.com/api/admin/edit/${editAdminId}`, payload);
       showToast('Admin updated!');
       fetchAdmins();
       setEditAdminId(null);
@@ -152,7 +152,7 @@ function AdminDashboard() {
   // Fetch all candidates
   const fetchCandidates = useCallback(async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/candidate/');
+      const res = await axios.get('https://voting-system-i2uh.onrender.com/api/candidate/');
       setCandidates(res.data);
     } catch {
       showToast('Failed to load candidates.', 'error');
@@ -167,7 +167,7 @@ function AdminDashboard() {
 
   const fetchCandidateCount = useCallback(async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/candidate/total/count');
+      const res = await axios.get('https://voting-system-i2uh.onrender.com/api/candidate/total/count');
       setCandidatesCount(res.data.totalCandidates);
     } catch {
       showToast('Failed to load candidates count.', 'error');
@@ -177,7 +177,7 @@ function AdminDashboard() {
   // Fetch total voters
   const fetchVoterCount = useCallback(async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/user/total/count');
+      const res = await axios.get('https://voting-system-i2uh.onrender.com/api/user/total/count');
       setVotersCount(res.data.totalVoters);
     } catch {
       showToast('Failed to load voters count.', 'error');
@@ -187,7 +187,7 @@ function AdminDashboard() {
   const lastStatusRef = useRef('');
   const fetchStatus = useCallback(async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/admin/status');
+      const res = await axios.get('https://voting-system-i2uh.onrender.com/api/admin/status');
       const data = res.data;
 
       // Play sounds on status change (catch play() errors to avoid runtime popup)
@@ -290,7 +290,7 @@ function AdminDashboard() {
     }
     try {
       // Use input values (local time) and convert to ISO for backend
-      const res = await axios.post('http://localhost:5000/api/election/create-or-update', {
+      const res = await axios.post('https://voting-system-i2uh.onrender.com/api/election/create-or-update', {
         startTime: new Date(startTime).toISOString(),
         endTime: new Date(endTime).toISOString(),
         candidateIds: selectedCandidateIds,
@@ -307,7 +307,7 @@ function AdminDashboard() {
   const endElection = async () => {
     if (!window.confirm('Are you sure you want to end the election?')) return;
     try {
-      const res = await axios.post('http://localhost:5000/api/admin/end');
+      const res = await axios.post('https://voting-system-i2uh.onrender.com/api/admin/end');
       showToast(res.data.message || 'Election ended.');
       // Wait a moment to ensure backend updates, then refresh status
       setTimeout(() => {
@@ -332,7 +332,7 @@ function AdminDashboard() {
       if (addCandidate.image) {
         formData.append('image', addCandidate.image);
       }
-      const res = await axios.post('http://localhost:5000/api/candidate', formData, {
+      const res = await axios.post('https://voting-system-i2uh.onrender.com/api/candidate', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       showToast(res.data.message || 'Candidate added!');
@@ -378,7 +378,7 @@ function AdminDashboard() {
       // Only send password if changed
       const payload = { ...editCandidate };
       if (!payload.password) delete payload.password;
-      await axios.put(`http://localhost:5000/api/candidate/${editId}`, payload);
+      await axios.put(`https://voting-system-i2uh.onrender.com/api/candidate/${editId}`, payload);
       showToast('Candidate updated!');
       fetchCandidates();
       setEditId(null);

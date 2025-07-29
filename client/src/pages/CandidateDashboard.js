@@ -15,7 +15,7 @@ function CandidateDashboard() {
   useEffect(() => {
     const fetchCandidate = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/candidate/${candidateId}`);
+        const res = await axios.get(`https://voting-system-i2uh.onrender.com/api/candidate/${candidateId}`);
         setCandidate(res.data);
         setOffering(res.data.offering || '');
         setLoading(false);
@@ -31,7 +31,7 @@ function CandidateDashboard() {
     const fetchElectionStatus = async () => {
       try {
         // Replace with your real API endpoint if available
-        const res = await axios.get('http://localhost:5000/api/election/current');
+        const res = await axios.get('https://voting-system-i2uh.onrender.com/api/election/current');
         setElectionStatus(res.data.status || 'Ongoing');
         setMaxVotes(res.data.totalVoters || 100); // fallback if not provided
       } catch (err) {
@@ -49,7 +49,7 @@ function CandidateDashboard() {
 
   const handleUpdate = async () => {
     try {
-      await axios.put(`http://localhost:5000/api/candidate/${candidateId}`, { offering });
+      await axios.put(`https://voting-system-i2uh.onrender.com/api/candidate/${candidateId}`, { offering });
       setEditing(false);
       alert('Profile updated!');
     } catch (err) {

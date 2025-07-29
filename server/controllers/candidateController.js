@@ -3,10 +3,9 @@ exports.createCandidate = async (req, res) => {
   try {
     const { name, position, email, password, offering } = req.body;
     let imageUrl = '';
-    if (req.file) {
-      // Save relative path for frontend
-      imageUrl = `/uploads/candidate_images/${req.file.filename}`;
-    }
+    if (req.file && req.file.path) {
+  imageUrl = req.file.path; // Cloudinary returns the image URL in 'path'
+  }
     const candidate = new Candidate({
       name,
       position,
