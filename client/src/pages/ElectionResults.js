@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
+import jsPDF from 'jspdf';
 import BalloonsAnimation from '../components/BalloonsAnimation';
 import axios from 'axios';
 
@@ -91,9 +92,170 @@ function ElectionResults() {
     window.location.href = '/';
   };
 
+  // Download report handler (PDF)
+  const handleDownloadReport = async () => {
+    if (!selectedElection || candidates.length === 0 || winners.length === 0) return;
+    const doc = new jsPDF();
+    let y = 20;
+    doc.setFontSize(22);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Election Report', 15, y);
+    doc.setFont('helvetica', 'normal');
+    y += 12;
+    doc.setFontSize(14);
+    doc.text(`Election ID: ${selectedElection._id}`, 15, y);
+    y += 8;
+    doc.text(`Start: ${selectedElection.startTime ? new Date(selectedElection.startTime).toLocaleString() : 'N/A'}`, 15, y);
+    y += 8;
+    doc.text(`End: ${selectedElection.endTime ? new Date(selectedElection.endTime).toLocaleString() : 'N/A'}`, 15, y);
+    y += 12;
+
+    // Winner section with image and effect (safe: no emojis)
+    if (winners.length === 1) {
+      doc.setFontSize(18);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Winner:', 15, y);
+      doc.text(winners[0].name, 40, y);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(15);
+      doc.text(`(${winners[0].position})`, 15, y + 8);
+      y += 20;
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`Votes: ${voteCounts[winners[0]._id] || 0}`, 15, y);
+      doc.setFont('helvetica', 'normal');
+      y += 5;
+
+      // Add winner image with effect (draw circle, then image)
+      let imgY = y;
+      let imgX = 80;
+      // Load winner image
+      let imgUrl = winners[0].imageUrl ? winners[0].imageUrl : '/default-avatar.png';
+      try {
+        const toDataUrl = url => fetch(url)
+          .then(r => r.blob())
+          .then(blob => new Promise((resolve, reject) => {
+            const reader = new window.FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+          }));
+        const base64 = await toDataUrl(imgUrl);
+        doc.addImage(base64, 'JPEG', imgX, imgY, 40, 40, undefined, 'FAST');
+        doc.setDrawColor(40, 167, 69);
+        doc.setLineWidth(1.5);
+        doc.rect(imgX, imgY, 40, 40);
+      } catch (e) {
+        // fallback: no image
+      }
+      y += 48;
+      doc.setFontSize(16);
+      doc.setTextColor(249, 168, 37);
+      doc.setFont('helvetica', 'bold');
+      doc.text('The campus celebrates your victory!', 15, y);
+      doc.setFont('helvetica', 'normal');
+      y += 10;
+      doc.setTextColor(40, 40, 40);
+      doc.setFontSize(13);
+      doc.text('With determination and spirit, you have inspired many.', 15, y);
+      y += 10;
+      doc.text('May your leadership bring joy and progress to all!', 15, y);
+      y += 12;
+    } else {
+      doc.setFontSize(16);
+      doc.text('Tie between:', 15, y);
+      y += 8;
+      doc.setFontSize(13);
+      winners.forEach(w => {
+        doc.text(`- ${w.name} (${w.position}), Votes: ${voteCounts[w._id] || 0}`, 15, y);
+        y += 8;
+      });
+      y += 4;
+      doc.setFontSize(14);
+      doc.setTextColor(249, 168, 37);
+      doc.setFont('helvetica', 'bold');
+      doc.text('The campus celebrates your shared victory!', 15, y);
+      doc.setFont('helvetica', 'normal');
+      y += 10;
+      doc.setTextColor(40, 40, 40);
+      doc.setFontSize(13);
+      doc.text('May your teamwork bring joy and progress to all!', 15, y);
+      y += 12;
+    }
+    doc.setTextColor(40, 40, 40);
+    doc.setFontSize(15);
+    doc.setFont('helvetica', 'bold');
+    doc.text('All Candidates:', 15, y);
+    doc.setFont('helvetica', 'normal');
+    y += 8;
+    doc.setFontSize(12);
+    candidates.forEach(c => {
+      doc.text(`- ${c.name} (${c.position}): ${voteCounts[c._id] || 0} votes`, 15, y);
+      y += 7;
+      if (y > 270) {
+        doc.addPage();
+        y = 20;
+      }
+    });
+
+    // Add second page with custom message for winner
+    doc.addPage();
+    doc.setFontSize(20);
+    doc.setFont('helvetica', 'bold');
+    if (winners.length === 1) {
+      // Wrap long lines manually for PDF compatibility
+      doc.text(`We proudly announce that ${winners[0].name} has been elected as`, 15, 30);
+      doc.text(`the winner of our university election!`, 15, 40);
+      doc.text('Congratulations to our new leader!', 15, 60);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(12);
+      doc.text(`With great energy and bold vision, ${winners[0].name} promises to bring exciting changes to our university life.`, 15, 70);
+      doc.text(`Here's what we can look forward to under their leadership:`, 15, 90);
+      let y2 = 100;
+      doc.setFontSize(10);
+      doc.text('- More events, less stress – From game nights to surprise snack giveaways, campus life is about to get better!', 15, y2);
+      y2 += 10;
+      doc.text('- Extended canteen hours – Midnight cravings? Solved.', 15, y2);
+      y2 += 10;
+      doc.text('- One extra holiday (somehow) – Democracy has spoken. Let us manifest it.', 15, y2);
+      y2 += 10;
+      doc.text('- Air conditioning in classrooms... in our dreams? – At least they will try.', 15, y2);
+      y2 += 10;
+      doc.text('- Official Meme Monday – Because laughter is the best study break.', 15, y2);
+      y2 += 14;
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`These are just a few of the changes promised by our new student champion, ${winners[0].name}. Whether they deliver or not… well, we voted for fun, and fun we shall have!`, 15, y2);
+      doc.setFont('helvetica', 'normal');
+    } else {
+      doc.text('We proudly announce that our winners have tied in the university election!', 15, 30);
+      doc.text('Congratulations to our new leaders!', 15, 40);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(14);
+      doc.text('With great energy and bold vision, our champions promise to bring exciting changes to our university life.', 15, 50);
+      doc.text('Here is what we can look forward to under their leadership:', 15, 60);
+      let y2 = 60;
+      doc.setFontSize(13);
+      doc.text('- More events, less stress – From game nights to surprise snack giveaways, campus life is about to get better!', 15, y2);
+      y2 += 10;
+      doc.text('- Extended canteen hours – Midnight cravings? Solved.', 15, y2);
+      y2 += 10;
+      doc.text('- One extra holiday (somehow) – Democracy has spoken. Let us manifest it.', 15, y2);
+      y2 += 10;
+      doc.text('- Air conditioning in classrooms... in our dreams? – At least they will try.', 15, y2);
+      y2 += 10;
+      doc.text('- Official Meme Monday – Because laughter is the best study break.', 15, y2);
+      y2 += 14;
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('These are just a few of the changes promised by our new student champions. Whether they deliver or not… well, we voted for fun, and fun we shall have!', 15, y2);
+      doc.setFont('helvetica', 'normal');
+    }
+    doc.save(`election_report_${selectedElection._id}.pdf`);
+  };
+
   return (
     <div style={{ maxWidth: 700, margin: '40px auto', padding: 24, background: '#f5faff', borderRadius: 12, boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}>
-      {/* Winner sound effect (royalty-free short mp3, you can replace with your own) */}
       <audio ref={winnerAudioRef} src="/sounds/start-sound.mp3" preload="auto" />
       <button
         onClick={handleGoHome}
@@ -188,6 +350,28 @@ function ElectionResults() {
           <div style={{ fontSize: 32, marginTop: 10, zIndex: 2, position: 'relative' }}>
             🎊 🎈 🥳 🎊 🎈
           </div>
+          {/* Download Report Button */}
+          <button
+            onClick={handleDownloadReport}
+            style={{
+              marginTop: 18,
+              padding: '10px 22px',
+              borderRadius: 20,
+              border: 'none',
+              cursor: 'pointer',
+              backgroundColor: '#43a047',
+              color: '#fff',
+              fontWeight: 'bold',
+              fontSize: 16,
+              boxShadow: '0 2px 10px #ccc',
+              transition: 'background-color 0.3s',
+              display: 'block',
+              marginLeft: 'auto',
+            }}
+            type="button"
+          >
+            Download Report
+          </button>
         </div>
       )}
 
